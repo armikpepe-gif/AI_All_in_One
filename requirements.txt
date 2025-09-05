@@ -1,33 +1,15 @@
-# ==== Core ====
+gradio==5.44.1
 torch==2.8.0
 torchaudio==2.8.0
-transformers==4.43.0
-gradio==5.44.1
-fastapi==0.116.1
-uvicorn==0.35.0
-
-# ==== Audio processing ====
-librosa==0.11.0
+pillow==11.3.0
 pydub==0.25.1
-soundfile==0.13.1
-audioread==3.0.1
-
-# ==== Image processing ====
-Pillow==11.3.0
-imageio==2.37.0
-imageio-ffmpeg==0.6.0
-
-# ==== Utilities ====
+librosa==0.11.0
 numpy==2.2.6
 scipy==1.16.1
-pandas==2.3.2
+moviepy==2.2.1
 requests==2.32.5
-python-dotenv==1.1.1
-
-# ==== Optional (web/other helpers) ====
-huggingface-hub==0.34.4
-orjson==3.11.3
-typing-extensions==4.15.0
-aiofiles==24.1.0
-httpx==0.28.1
 beautifulsoup4==4.13.5
+gdown==5.2.0
+fastapi==0.116.1
+uvicorn==0.35.0
+python-dotenv==1.1.1
