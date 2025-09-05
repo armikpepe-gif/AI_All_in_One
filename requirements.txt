@@ -1,5 +1,7 @@
-gradio==3.44.0
-pillow==10.1.0
-torchaudio==2.1.0
-torch==2.1.0
+# requirements.txt سبک برای Render
+gradio==5.44.1
+pillow==11.3.0
 pydub==0.25.1
+torchaudio==2.8.0
+torch==2.8.0
+librosa==0.11.0
