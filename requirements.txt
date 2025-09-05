@@ -1,9 +1,6 @@
-gradio
-torch
-torchaudio
-Pillow
-pydub
-gdown
-moviepy
-ffmpeg-python
-librosa
+gradio==3.42.0
+torch==2.1.0
+torchaudio==2.1.0
+pillow==10.0.0
+pydub==0.27.1
+numpy==1.26.0
