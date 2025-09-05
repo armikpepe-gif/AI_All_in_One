@@ -1,0 +1,9 @@
+gradio
+torch
+torchaudio
+Pillow
+pydub
+gdown
+moviepy
+ffmpeg-python
+librosa
