@@ -1,5 +1,0 @@
-gradio
-torch
-torchaudio
-pydub
-Pillow
