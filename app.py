@@ -1,15 +1,15 @@
+# app.py
 import os
 import zipfile
 from pathlib import Path
 import tempfile
-from google.colab import drive  # اگر از کولب استفاده می‌کنید، در Render لازم نیست
-import gradio as gr
 from PIL import Image
 from pydub import AudioSegment
 import torch
 import torchaudio
+import gradio as gr
 
-# ==== مسیر فایل ZIP ورودی در Google Drive ====
+# ==== مسیر فایل ZIP ورودی در گوگل درایو ====
 ZIP_PATH = "/content/drive/MyDrive/AI_App_Files/All_in_One_Final.zip"
 EXTRACT_PATH = "/content/Extracted_Files"
 OUTPUT_ZIP = "/content/Processed_All_in_One.zip"
@@ -76,10 +76,9 @@ app = gr.Interface(
     fn=process_zip,
     inputs=gr.Textbox(label="مسیر ZIP در گوگل درایو", placeholder=ZIP_PATH),
     outputs=gr.Textbox(label="خروجی"),
-    title="اپ AI فوق پیشرفته",
+    title="اپ AI_All_in_One",
     description="این اپ فایل ZIP صوت، تصویر و متن را پردازش و خروجی ZIP نهایی با لینک مستقیم تولید می‌کند."
 )
 
-# ==== اجرا روی Render یا لوکال ====
-if __name__ == "__main__":
-    app.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 8080)), share=False)
+# ==== اجرا و لینک اشتراک موبایل ====
+app.launch(share=True)
