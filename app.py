@@ -2,13 +2,14 @@ import os
 import zipfile
 from pathlib import Path
 import tempfile
+from google.colab import drive  # اگر از کولب استفاده می‌کنید، در Render لازم نیست
+import gradio as gr
 from PIL import Image
 from pydub import AudioSegment
 import torch
 import torchaudio
-import gradio as gr
 
-# ==== مسیر فایل ZIP ورودی روی گوگل درایو ====
+# ==== مسیر فایل ZIP ورودی در Google Drive ====
 ZIP_PATH = "/content/drive/MyDrive/AI_App_Files/All_in_One_Final.zip"
 EXTRACT_PATH = "/content/Extracted_Files"
 OUTPUT_ZIP = "/content/Processed_All_in_One.zip"
@@ -46,6 +47,7 @@ def process_zip(zip_path):
     audio_texts = []
     images_processed = []
 
+    # پردازش فایل‌ها
     for f in extracted_folder.rglob("*"):
         if f.suffix.lower() in ['.wav', '.mp3', '.m4a']:
             text = audio_to_text(f)
@@ -54,12 +56,13 @@ def process_zip(zip_path):
             new_image = process_image(f)
             images_processed.append(new_image.name)
         elif f.suffix.lower() in ['.txt']:
-            continue
-
+            continue  # متن‌ها را مستقیم اضافه می‌کنیم
+    
     # ساخت ZIP خروجی
     with zipfile.ZipFile(OUTPUT_ZIP, 'w') as out_zip:
         for f in extracted_folder.rglob("*"):
             out_zip.write(f, arcname=f.name)
+        # اضافه کردن فایل متن خروجی
         transcript_file = Path(tempfile.gettempdir()) / "audio_transcripts.txt"
         with open(transcript_file, 'w', encoding='utf-8') as t:
             for fn, txt in audio_texts:
@@ -73,9 +76,10 @@ app = gr.Interface(
     fn=process_zip,
     inputs=gr.Textbox(label="مسیر ZIP در گوگل درایو", placeholder=ZIP_PATH),
     outputs=gr.Textbox(label="خروجی"),
-    title="اپ AI All-in-One",
-    description="پردازش ZIP شامل صوت، تصویر و متن و ساخت خروجی ZIP نهایی."
+    title="اپ AI فوق پیشرفته",
+    description="این اپ فایل ZIP صوت، تصویر و متن را پردازش و خروجی ZIP نهایی با لینک مستقیم تولید می‌کند."
 )
 
-# ==== اجرا ====
-app.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 8080)))
+# ==== اجرا روی Render یا لوکال ====
+if __name__ == "__main__":
+    app.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 8080)), share=False)
