@@ -2,16 +2,16 @@
 Pillow==11.3.0
 
 # پردازش صوت
-torch==2.8.1
-torchaudio==2.8.1
+torch==2.2.0
+torchaudio==2.2.0
 
 # پردازش و تحلیل داده‌ها
-numpy==2.2.6
-scipy==1.16.1
-pandas==2.3.2
+numpy==1.25.3
+scipy==1.11.3
+pandas==2.1.1
 
 # پردازش فایل‌های صوتی و موسیقی
-librosa==0.11.0
+librosa==0.11.1
 pydub==0.25.1
 soundfile==0.13.1
 
@@ -30,5 +30,5 @@ typing-extensions==4.15.0
 tqdm==4.67.1
 cryptography==41.0.3
 
-# اتصال به Supabase
+# اتصال به Supabase (نسخه سازگار با Python 3.12)
 supabase-py==1.10.0
