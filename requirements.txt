@@ -17,6 +17,8 @@ soundfile==0.13.1
 
 # رابط وب و UI
 gradio==5.44.1
+fastapi==0.116.1
+uvicorn==0.35.0
 
 # دانلود از اینترنت و مدیریت فایل‌ها
 gdown==5.2.0
@@ -24,4 +26,8 @@ requests==2.32.5
 
 # ابزارهای کمکی
 python-dotenv==1.1.1
-supabase==3.0.0
+typing-extensions==4.15.0
+tqdm==4.67.1
+
+# Supabase نسخه سازگار با Python 3.13
+supabase==2.18.1
