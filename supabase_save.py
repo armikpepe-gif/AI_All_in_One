@@ -10,7 +10,7 @@ from supabase import create_client, Client
 
 # ==== Supabase Config ====
 SUPABASE_URL = "https://zlrztiytgzqpxkoadefg.supabase.co"
-SUPABASE_KEY = "<your-anon-or-service-key>"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpscnp0aXl0Z3pxcHhrb2FkZWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxMzgxMDEsImV4cCI6MjA3MjcxNDEwMX0.V213ENLlZLu54pitDhyYhHNvsc_ImP3PQIRe8cPs0uk"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ==== Paths ====
