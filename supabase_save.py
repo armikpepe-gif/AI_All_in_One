@@ -1,29 +1,41 @@
-# supabase_zip_processor.py
-import zipfile
-from pathlib import Path
-import tempfile
-from datetime import datetime
-from PIL import Image
-import torchaudio
-import torch
-from supabase import create_client, Client
+# supabase_config.py
 
-# ==== Supabase Config ====
-SUPABASE_URL = "https://zlrztiytgzqpxkoadefg.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpscnp0aXl0Z3pxcHhrb2FkZWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxMzgxMDEsImV4cCI6MjA3MjcxNDEwMX0.V213ENLlZLu54pitDhyYhHNvsc_ImP3PQIRe8cPs0uk"
+from supabase import create_client, Client
+import os
+from pathlib import Path
+import zipfile
+from PIL import Image
+from pydub import AudioSegment
+import torch
+import torchaudio
+
+# ==== دریافت کلید و آدرس از Environment Variables ====
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("Supabase URL یا Key پیدا نشد! لطفا Environment Variables رو تنظیم کنید.")
+
+# ==== ایجاد کلاینت Supabase ====
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ==== Paths ====
-ZIP_PATH = "All_in_One_Final.zip"  # مسیر ZIP
-EXTRACT_PATH = Path(tempfile.gettempdir()) / "Extracted_Files"
+# ==== توابع کمکی ====
 
-EXTRACT_PATH.mkdir(exist_ok=True)
+# پردازش تصاویر (HEIC -> JPG)
+def process_image(path: Path) -> Path:
+    ext = path.suffix.lower()
+    if ext in ['.heic', '.heif']:
+        img = Image.open(path)
+        new_path = path.with_suffix('.jpg')
+        img.save(new_path, format="JPEG")
+        return new_path
+    return path
 
-# ==== Model for audio to text ====
+# تبدیل صوت به متن
 bundle = torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
 asr_model = bundle.get_model()
 
-def audio_to_text(path):
+def audio_to_text(path: Path) -> str:
     waveform, sample_rate = torchaudio.load(path)
     with torch.inference_mode():
         emissions, _ = asr_model(waveform)
@@ -31,60 +43,42 @@ def audio_to_text(path):
         transcript = bundle.decode(tokens)
     return transcript
 
-def process_file(path: Path):
-    """
-    پردازش فایل و آماده‌سازی اطلاعات برای Supabase
-    """
-    suffix = path.suffix.lower()
-    if suffix in ['.wav', '.mp3', '.m4a']:
-        transcript = audio_to_text(str(path))
-        file_type = "audio"
-    elif suffix in ['.jpg', '.png', '.heic', '.heif']:
-        img = Image.open(path)
-        file_type = "image"
-        transcript = None
-    else:
-        file_type = "text"
-        transcript = None
-    
-    return {
-        "file_name": path.name,
-        "file_type": file_type,
-        "file_path": str(path),
-        "transcript": transcript
-    }
+# پردازش فایل ZIP و ذخیره در Supabase
+def process_zip_and_save(zip_path: str, extract_path: str = "Extracted_Files"):
+    os.makedirs(extract_path, exist_ok=True)
+    audio_texts = []
+    images_processed = []
 
-def save_to_supabase(file_info: dict):
-    """
-    ذخیره داده‌ها در جدول ai_files در Supabase
-    """
-    try:
-        response = supabase.table("ai_files").insert({
-            "file_name": file_info["file_name"],
-            "file_type": file_info["file_type"],
-            "file_path": file_info["file_path"],
-            "transcript": file_info["transcript"],
-            "created_at": datetime.utcnow().isoformat()
-        }).execute()
-        if response.error:
-            print(f"❌ خطا در ذخیره {file_info['file_name']}: {response.error}")
-        else:
-            print(f"✅ ذخیره شد: {file_info['file_name']}")
-    except Exception as e:
-        print(f"❌ استثناء در ذخیره {file_info['file_name']}: {e}")
-
-def extract_zip(zip_path: str, extract_to: Path):
+    # استخراج ZIP
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
-    print(f"✅ ZIP استخراج شد به {extract_to}")
+        zip_ref.extractall(extract_path)
 
-def process_zip_and_save(zip_path: str):
-    extract_zip(zip_path, EXTRACT_PATH)
-    for f in EXTRACT_PATH.rglob("*"):
-        if f.is_file():
-            info = process_file(f)
-            save_to_supabase(info)
+    extracted_folder = Path(extract_path)
 
-# ==== اجرا ====
-if __name__ == "__main__":
-    process_zip_and_save(ZIP_PATH)
+    # پردازش فایل‌ها
+    for f in extracted_folder.rglob("*"):
+        if f.suffix.lower() in ['.wav', '.mp3', '.m4a']:
+            text = audio_to_text(f)
+            audio_texts.append((f.name, text))
+            supabase.table("ai_files").insert({
+                "file_name": f.name,
+                "file_type": "audio",
+                "file_path": str(f),
+                "transcript": text
+            }).execute()
+        elif f.suffix.lower() in ['.jpg', '.png', '.heic', '.heif']:
+            new_image = process_image(f)
+            images_processed.append(new_image.name)
+            supabase.table("ai_files").insert({
+                "file_name": new_image.name,
+                "file_type": "image",
+                "file_path": str(new_image)
+            }).execute()
+        elif f.suffix.lower() in ['.txt']:
+            supabase.table("ai_files").insert({
+                "file_name": f.name,
+                "file_type": "text",
+                "file_path": str(f)
+            }).execute()
+
+    return f"✅ پردازش و ذخیره فایل‌ها در Supabase کامل شد!"
