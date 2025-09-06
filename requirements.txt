@@ -2,8 +2,8 @@
 Pillow==11.3.0
 
 # پردازش صوت
-torch==2.8.0
-torchaudio==2.8.0
+torch==2.8.1
+torchaudio==2.8.1
 
 # پردازش و تحلیل داده‌ها
 numpy==2.2.6
@@ -31,4 +31,4 @@ tqdm==4.67.1
 cryptography==41.0.3
 
 # اتصال به Supabase
-supabase-py>=2.18.1
+supabase-py==1.10.0
