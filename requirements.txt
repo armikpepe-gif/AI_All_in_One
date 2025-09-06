@@ -1,5 +1,5 @@
 # Supabase و وابستگی‌ها
-supabase-py==1.10.0
+supabase
 httpx>=0.24.1
 postgrest-py>=0.3.2
 cryptography==41.0.3
@@ -8,8 +8,8 @@ cryptography==41.0.3
 Pillow==11.3.0
 
 # پردازش صوت (CPU-only برای Render)
-torch==2.2.0+cpu
-torchaudio==2.2.0+cpu
+torch==2.2.0
+torchaudio==2.2.0
 
 # پردازش و تحلیل داده‌ها
 numpy==1.25.2
