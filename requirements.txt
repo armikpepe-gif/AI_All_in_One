@@ -1,8 +1,4 @@
-# نصب supabase مستقیم از GitHub (حل مشکل عدم یافتن نسخه)
 git+https://github.com/supabase/supabase-py.git@v2.18.1#egg=supabase
-httpx>=0.24.1
-postgrest-py>=0.3.2
-cryptography==41.0.3
 
 # پردازش تصویر
 Pillow==11.3.0
