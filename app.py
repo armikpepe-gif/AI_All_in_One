@@ -1,4 +1,4 @@
-# app_secure.py
+# app_secure_complete.py
 import os
 import zipfile
 from pathlib import Path
@@ -13,34 +13,36 @@ from supabase import create_client, Client
 import uuid
 from cryptography.fernet import Fernet
 
-# --------------------------
+# =========================
 # اتصال به Supabase
-# --------------------------
+# =========================
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("لطفاً متغیرهای محیطی SUPABASE_URL و SUPABASE_KEY را تنظیم کنید.")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 TABLE_NAME = "ai_files"
 STORAGE_BUCKET = "ai-storage"
 
-# --------------------------
+# =========================
 # کلید رمزنگاری
-# --------------------------
+# =========================
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 if not ENCRYPTION_KEY:
     raise ValueError("Environment variable ENCRYPTION_KEY تعریف نشده است!")
 fernet = Fernet(ENCRYPTION_KEY)
 
-# --------------------------
+# =========================
 # مسیرهای محلی
-# --------------------------
+# =========================
 ZIP_PATH_DEFAULT = "All_in_One_Final.zip"
 EXTRACT_PATH = "Extracted_Files"
 os.makedirs(EXTRACT_PATH, exist_ok=True)
 
-# --------------------------
+# =========================
 # مدل پردازش صوت
-# --------------------------
+# =========================
 bundle = torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
 asr_model = bundle.get_model()
 
@@ -51,9 +53,9 @@ def audio_to_text(path: Path):
         tokens = torch.argmax(emissions[0], dim=-1)
         return bundle.decode(tokens)
 
-# --------------------------
+# =========================
 # پردازش تصویر
-# --------------------------
+# =========================
 def process_image(path: Path):
     if path.suffix.lower() in ['.heic', '.heif']:
         img = Image.open(path)
@@ -62,9 +64,9 @@ def process_image(path: Path):
         return new_path
     return path
 
-# --------------------------
+# =========================
 # آپلود فایل رمزنگاری‌شده
-# --------------------------
+# =========================
 def upload_file_encrypted(file_path: Path, file_type: str, transcript: str = None):
     file_id = str(uuid.uuid4())
     storage_path = f"{file_id}_{file_path.name}"
@@ -87,9 +89,9 @@ def upload_file_encrypted(file_path: Path, file_type: str, transcript: str = Non
 
     return file_url
 
-# --------------------------
+# =========================
 # پردازش ZIP
-# --------------------------
+# =========================
 def process_zip(zip_path=ZIP_PATH_DEFAULT):
     shutil.rmtree(EXTRACT_PATH, ignore_errors=True)
     os.makedirs(EXTRACT_PATH, exist_ok=True)
@@ -118,9 +120,9 @@ def process_zip(zip_path=ZIP_PATH_DEFAULT):
 
     return "✅ فایل‌ها رمزنگاری و آپلود شدند:\n" + "\n".join(uploaded_files)
 
-# --------------------------
+# =========================
 # چت با حافظه رمزنگاری‌شده
-# --------------------------
+# =========================
 def chat(user_input):
     temp_txt = Path(tempfile.gettempdir()) / f"{uuid.uuid4()}.txt"
     temp_txt.write_text(user_input, encoding="utf-8")
@@ -139,9 +141,9 @@ def chat(user_input):
         history = "هنوز چیزی ذخیره نشده."
     return "پیام ذخیره شد ✅", history
 
-# --------------------------
+# =========================
 # رابط کاربری Gradio
-# --------------------------
+# =========================
 with gr.Blocks() as demo:
     gr.Markdown("## 🤖 AI_All_in_One با حافظه و فایل‌های رمزنگاری‌شده")
 
