@@ -1,25 +1,53 @@
+# app.py
+import os
 import gradio as gr
-from smart_ai_memory import SmartAI_Memory
+from supabase import create_client, Client
 
-ai_memory = SmartAI_Memory()
+# === اتصال به سوپابیس با کلید و URL از Environment Variables ===
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def chat(user, message):
-    # بازیابی خاطرات اخیر
-    past = ai_memory.recall(user, limit=3)
+# === نام جدول حافظه ===
+TABLE_NAME = "ai_memory"
 
-    # شبیه‌سازی یک پاسخ هوشمند (اینجا میشه مدل AI وصل کرد)
-    response = f"🔹 پیام شما: {message}\n\n📜 خاطرات اخیر:\n{past}"
+# === ذخیره پیام و پاسخ در سوپابیس ===
+def save_memory(user_message, ai_response):
+    supabase.table(TABLE_NAME).insert({
+        "user_message": user_message,
+        "ai_response": ai_response
+    }).execute()
 
-    # ذخیره مکالمه
-    ai_memory.remember(user, message, response)
-    return response
+# === واکشی کل تاریخچه گفتگو ===
+def load_memory():
+    response = supabase.table(TABLE_NAME).select("*").order("created_at").execute()
+    if response.data:
+        return "\n".join([f"👤 {row['user_message']}\n🤖 {row['ai_response']}" for row in response.data])
+    return "هنوز گفتگویی ذخیره نشده."
 
-app = gr.Interface(
-    fn=chat,
-    inputs=[gr.Textbox(label="👤 نام کاربر"), gr.Textbox(label="💬 پیام")],
-    outputs=gr.Textbox(label="🤖 پاسخ AI"),
-    title="هوش مصنوعی با حافظه دائمی"
-)
+# === تابع اصلی برای چت ===
+def chat(user_input):
+    # شبیه‌سازی پاسخ هوش مصنوعی (اینجا ساده است – میشه بعدا مدل قوی وصل کرد)
+    ai_response = f"پاسخت به '{user_input}' اینه: من پیام رو گرفتم و ذخیره کردم ✅"
 
-if __name__ == "__main__":
-    app.launch(server_name="0.0.0.0", server_port=8000)
+    # ذخیره در حافظه دائمی
+    save_memory(user_input, ai_response)
+
+    # تاریخچه کامل گفتگو
+    history = load_memory()
+    return ai_response, history
+
+# === رابط کاربری Gradio ===
+with gr.Blocks() as demo:
+    gr.Markdown("## 🤖 AI با حافظه دائمی (Supabase)")
+
+    with gr.Row():
+        user_input = gr.Textbox(label="پیامتو بنویس:")
+        send_btn = gr.Button("ارسال")
+
+    ai_output = gr.Textbox(label="پاسخ AI")
+    history_output = gr.Textbox(label="تاریخچه گفتگو", lines=15)
+
+    send_btn.click(chat, inputs=[user_input], outputs=[ai_output, history_output])
+
+demo.launch(share=True)
