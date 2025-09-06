@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # نصب کتابخانه‌های سیستمی
 RUN apt-get update && apt-get install -y \
@@ -17,5 +17,4 @@ COPY . .
 
 EXPOSE 7860
 
-# اجرای FastAPI روی Render
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
