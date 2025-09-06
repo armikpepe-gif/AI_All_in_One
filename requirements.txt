@@ -28,6 +28,7 @@ requests==2.32.5
 python-dotenv==1.1.1
 typing-extensions==4.15.0
 tqdm==4.67.1
+cryptography==41.0.3
 
 # اتصال به Supabase
 supabase-py==2.18.1
