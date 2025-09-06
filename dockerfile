@@ -1,4 +1,4 @@
-# استفاده از Python 3.11-slim برای سازگاری با supabase-py
+# تصویر پایه Python 3.11-slim
 FROM python:3.11-slim
 
 # نصب کتابخانه‌های سیستمی مورد نیاز
@@ -8,18 +8,20 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# تنظیم مسیر کاری
+# مسیر کاری پروژه
 WORKDIR /app
 
-# کپی requirements.txt و نصب pip و پکیج‌ها
+# کپی فایل requirements.txt و نصب pip و setuptools
 COPY requirements.txt .
-RUN python -m pip install --upgrade pip
+RUN python -m pip install --upgrade pip setuptools wheel
+
+# نصب همه پکیج‌ها
 RUN pip install --no-cache-dir -r requirements.txt
 
 # کپی باقی فایل‌های پروژه
 COPY . .
 
-# باز کردن پورت برای FastAPI/Gradio
+# باز کردن پورت برای FastAPI / Gradio
 EXPOSE 7860
 
 # اجرای FastAPI روی Render
