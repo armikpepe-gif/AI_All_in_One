@@ -9,8 +9,7 @@ import torch
 import torchaudio
 import gradio as gr
 
-# ==== مسیر فایل ZIP روی سرور ====
-# میتونی این مسیر رو به مسیر آپلود کاربر تغییر بدی
+# ==== مسیر فایل ZIP ورودی (همراه پروژه در GitHub) ====
 ZIP_PATH = "All_in_One_Final.zip"
 EXTRACT_PATH = "Extracted_Files"
 OUTPUT_ZIP = "Processed_All_in_One.zip"
@@ -48,6 +47,7 @@ def process_zip(zip_path):
     audio_texts = []
     images_processed = []
 
+    # پردازش فایل‌ها
     for f in extracted_folder.rglob("*"):
         if f.suffix.lower() in ['.wav', '.mp3', '.m4a']:
             text = audio_to_text(f)
@@ -58,9 +58,11 @@ def process_zip(zip_path):
         elif f.suffix.lower() in ['.txt']:
             continue
     
+    # ساخت ZIP خروجی
     with zipfile.ZipFile(OUTPUT_ZIP, 'w') as out_zip:
         for f in extracted_folder.rglob("*"):
             out_zip.write(f, arcname=f.name)
+        # اضافه کردن فایل متن خروجی
         transcript_file = Path(tempfile.gettempdir()) / "audio_transcripts.txt"
         with open(transcript_file, 'w', encoding='utf-8') as t:
             for fn, txt in audio_texts:
@@ -72,12 +74,11 @@ def process_zip(zip_path):
 # ==== رابط کاربری Gradio ====
 app = gr.Interface(
     fn=process_zip,
-    inputs=gr.Textbox(label="مسیر ZIP روی سرور", placeholder=ZIP_PATH),
+    inputs=gr.Textbox(label="مسیر ZIP", placeholder=ZIP_PATH),
     outputs=gr.Textbox(label="خروجی"),
     title="اپ AI_All_in_One",
     description="این اپ فایل ZIP صوت، تصویر و متن را پردازش و خروجی ZIP نهایی تولید می‌کند."
 )
 
-# ==== اجرا برای رندر ====
-port = int(os.environ.get("PORT", 8080))
-app.launch(server_name="0.0.0.0", server_port=port)
+# ==== اجرا و لینک اشتراک ====
+app.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 8080)))
