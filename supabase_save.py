@@ -9,7 +9,7 @@ import torch
 from supabase import create_client, Client
 
 # ==== Supabase Config ====
-SUPABASE_URL = "https://<your-project-id>.supabase.co"
+SUPABASE_URL = "https://zlrztiytgzqpxkoadefg.supabase.co"
 SUPABASE_KEY = "<your-anon-or-service-key>"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
